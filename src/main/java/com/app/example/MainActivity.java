@@ -14,6 +14,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
+import android.webkit.CookieManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
     ProgressDialog mProgressDialog;
     ProgressDialog progressDialog;
 
-    private String HTTPS_URL ="https://example.com";
+    private String HTTPS_URL ="https://erp-dev.dullesglass.com/web#action=776";
     //private String HTTP_URL ="http://example.com";
 
     private boolean isSSLErrorDialogShown = false;
@@ -35,9 +36,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage("Carregando ");
+        mProgressDialog.setMessage("Loading... ");
         mProgressDialog.show();
         webView = (WebView) findViewById(R.id.webview);
+
 
         WebView webView = (WebView) findViewById(R.id.webview);
         webView.getSettings().setDomStorageEnabled(true);
@@ -47,7 +49,10 @@ public class MainActivity extends AppCompatActivity {
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setSupportZoom(false);
         webView.getSettings().setAppCacheEnabled(true);
+//        webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         webView.getSettings().setSupportZoom(false);
+
+        CookieManager.getInstance().setAcceptThirdPartyCookies(webView,true);
 
         webView.loadUrl(HTTPS_URL);
 
@@ -58,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private class HelloWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            if(!url.contains("example.com")){
+            if(!url.contains("erp-dev.dullesglass")){
                 Intent i = new Intent(Intent.ACTION_VIEW);
                 i.setData(Uri.parse(url));
                 startActivity(i);
@@ -140,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
         webView.getSettings().setSupportZoom(false);
 
         progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Carregando...");
+        progressDialog.setMessage("Loading...");
         progressDialog.show();
 
         webView.setWebViewClient(new WebViewClient() {
