@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/login"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ba68c8">
+
+
+<!--    <ImageView-->
+<!--        android:id="@+id/imageView"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:scaleType="centerInside"-->
+<!--        android:srcCompat="@drawable/odoo_logo" />-->
+
+    <EditText
+    android:layout_width="300dp"
+    android:layout_height="56dp"
+    android:layout_gravity="center_horizontal"
+    android:textColorHint="#8effffff"
+    android:paddingEnd="32dp"
+    android:background="@drawable/bubble"
+    android:gravity="center_vertical"
+    android:paddingStart="32dp"
+    android:hint="@string/email"
+    android:textColor="#ffffff" />
+
+<EditText
+    android:layout_width="300dp"
+    android:layout_height="56dp"
+    android:paddingEnd="32dp"
+    android:layout_gravity="center_horizontal"
+    android:layout_marginTop="16dp"
+    android:background="@drawable/bubble"
+    android:textColorHint="#8effffff"
+    android:gravity="center_vertical"
+    android:paddingStart="32dp"
+    android:hint="@string/password"
+    android:textColor="#ffffff" />
+
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="48dp"
+    android:layout_gravity="center_horizontal"
+    android:id="@+id/forgot_password"
+    android:layout_marginTop="64dp"
+    android:gravity="center"
+    android:text="@string/forgot_password"
+    android:textColor="#ffffff" />
+
+    <Button
+        android:id="@+id/loginButton"
+        android:background="?android:attr/selectableItemBackground"
+        android:layout_width="219dp"
+        android:layout_height="120dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="64dp"
+        android:gravity="center"
+        android:text="@string/login"
+        android:textColor="#ffffff"
+        android:textSize="60sp"
+        android:typeface="normal" />
+
+</LinearLayout>

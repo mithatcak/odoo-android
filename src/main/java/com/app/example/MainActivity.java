@@ -6,32 +6,35 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.net.http.SslError;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.webkit.SslErrorHandler;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.Toast;
-import android.webkit.CookieManager;
-
-
-/* printer libraries */
-import android.printer.sdk.util.PowerUtils;
 import android.printer.sdk.PosFactory;
-import cn.pda.serialport.SerialDriver;
-import android.printer.sdk.interfaces.IPosApi;
-import android.printer.sdk.interfaces.OnPrintEventListener;
-import android.printer.sdk.constant.BarCode;
 import android.printer.sdk.bean.BarCodeBean;
 import android.printer.sdk.bean.enums.ALIGN_MODE;
+import android.printer.sdk.constant.BarCode;
+import android.printer.sdk.interfaces.IPosApi;
+import android.printer.sdk.interfaces.OnPrintEventListener;
+import android.printer.sdk.util.PowerUtils;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.webkit.CookieManager;
+import android.webkit.SslErrorHandler;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+
+import cn.pda.serialport.SerialDriver;
+
+/* printer libraries */
 
 public class MainActivity extends AppCompatActivity {
 
     //printer stuff
     private IPosApi mPosApi;
     private int mConcentration=25;
+
+    static private String DEVICEFINGERPRINT = "U9000";
+    static private String DEVICEPRINTER = "S60";
 
 
     //Webview stuff
@@ -43,6 +46,11 @@ public class MainActivity extends AppCompatActivity {
     //private String HTTP_URL ="http://example.com";
 
     private boolean isSSLErrorDialogShown = false;
+
+    static String DEVICENAME;
+
+    public boolean IsPrinter = false;
+
 //
 //    example.com
 
@@ -52,8 +60,17 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
+        //Check Device Compatible with Printer
+        DEVICENAME = getDeviceName();
+        CheckIsPrinter(DEVICENAME);
+
+
+        Log.d(DEVICENAME,"THIS IS DEVICE NAME !!!!!!!!!");
+
+
         //Init Printer
-        initPos ();
+        if(IsPrinter)
+            initPos ();
 
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("Loading... ");
@@ -86,6 +103,17 @@ public class MainActivity extends AppCompatActivity {
         mPosApi.setPrintEventListener (onPrintEventListener);
         mPosApi.openDev ("/dev/ttyS2", 115200, 0);
         mPosApi.initPos (); // 初始化打印机 init printer
+    }
+
+    private String getDeviceName(){
+        return Build.DEVICE;
+    }
+
+    private void CheckIsPrinter(String DeviceName){
+        if(DeviceName == DEVICEPRINTER)
+            IsPrinter = true;
+        else if (DeviceName == DEVICEFINGERPRINT)
+            IsPrinter = false;
     }
 
 
@@ -152,27 +180,35 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume ();
-        mPosApi.resume ();
-        PowerUtils.powerOnOrOff (1, "1");
+        if(IsPrinter){
+            super.onResume ();
+            mPosApi.resume ();
+            PowerUtils.powerOnOrOff (1, "1");
+        }
+
     }
 
     @Override
     protected void onPause() {
         super.onPause ();
-        mPosApi.stop ();
-        PowerUtils.powerOnOrOff (1, "0");
+        if(IsPrinter){
+            mPosApi.stop ();
+            PowerUtils.powerOnOrOff (1, "0");
+        }
     }
 
 
     @Override
     protected void onDestroy() {
         super.onDestroy ();
-        if (mPosApi != null) {
-            mPosApi.closePos ();
-            mPosApi.closeDev ();
-            PosFactory.Destroy ();
+        if(IsPrinter){
+            if (mPosApi != null) {
+                mPosApi.closePos ();
+                mPosApi.closeDev ();
+                PosFactory.Destroy ();
+            }
+            PowerUtils.powerOnOrOff (1, "0");
         }
-        PowerUtils.powerOnOrOff (1, "0");
     }
 
 
@@ -196,8 +232,11 @@ public class MainActivity extends AppCompatActivity {
             mProgressDialog.dismiss();
             view.setVisibility(View.VISIBLE);
             super.onPageFinished(view, url);
-            print_barcode();
-            mPosApi.printStart ();
+
+            if(IsPrinter){
+                print_barcode();
+                mPosApi.printStart ();
+            }
         }
 
         @Override

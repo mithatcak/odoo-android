@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Odoo</string>
+    <string name="password">password</string>
+    <string name="email">email</string>
+    <string name="login">LOGIN</string>
+    <string name="forgot_password">forgot password</string>
 </resources>
