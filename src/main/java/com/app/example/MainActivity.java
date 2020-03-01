@@ -15,13 +15,14 @@ import android.printer.sdk.constant.BarCode;
 import android.printer.sdk.interfaces.IPosApi;
 import android.printer.sdk.interfaces.OnPrintEventListener;
 import android.printer.sdk.util.PowerUtils;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import cn.pda.serialport.SerialDriver;
 
@@ -42,7 +43,8 @@ public class MainActivity extends AppCompatActivity {
     ProgressDialog mProgressDialog;
     ProgressDialog progressDialog;
 
-    private String HTTPS_URL ="https://erp-dev.dullesglass.com/web#action=776";
+    private String HTTPS_URL = BuildConfig.SERVER_URL;
+    private String BASE_HTTPS_URL = BuildConfig.SERVER_BASE_URL;
     //private String HTTP_URL ="http://example.com";
 
     private boolean isSSLErrorDialogShown = false;
@@ -215,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
     private class HelloWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            if(!url.contains("erp-dev.dullesglass")){
+            if(!url.contains(BASE_HTTPS_URL)){
                 Intent i = new Intent(Intent.ACTION_VIEW);
                 i.setData(Uri.parse(url));
                 startActivity(i);
