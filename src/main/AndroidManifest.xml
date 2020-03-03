@@ -3,6 +3,8 @@
     package="com.app.example">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name ="Android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name ="Android.permission.READ_EXTERNAL_STORAGE"/>
 
     <application
         android:allowBackup="true"
@@ -11,11 +13,29 @@
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         android:theme="@style/AppTheme.NoActionBar">
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+                <data android:scheme="https"
+                    android:host="erp-dev.dullesglass.com"
+                    android:pathPrefix="/mail" />
+                <!-- note that the leading "/" is required for pathPrefix-->
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".DeepLinkActivity"
+            android:label="Odoo" >
+            <intent-filter android:label="Odoo">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Accepts URIs that begin with "http://www.example.com/gizmos” -->
+                <data android:scheme="https"
+                    android:host="erp-dev.dullesglass.com"
+                    android:pathPrefix="/mail" />
+                <!-- note that the leading "/" is required for pathPrefix-->
             </intent-filter>
         </activity>
         <activity android:name=".LoginActivity"></activity>

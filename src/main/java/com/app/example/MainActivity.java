@@ -42,20 +42,17 @@ public class MainActivity extends AppCompatActivity {
     //Webview stuff
     private WebView webView;
     ProgressDialog mProgressDialog;
-    ProgressDialog progressDialog;
 
     private String HTTPS_URL = BuildConfig.SERVER_URL;
     private String BASE_HTTPS_URL = BuildConfig.SERVER_BASE_URL;
-    //private String HTTP_URL ="http://example.com";
+
+    private String cookie;
 
     private boolean isSSLErrorDialogShown = false;
 
     static String DEVICENAME;
 
     public boolean IsPrinter = false;
-
-//
-//    example.com
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         CheckIsPrinter(DEVICENAME);
 
 
-        Log.d(DEVICENAME,"THIS IS DEVICE NAME !!!!!!!!!");
+             Log.d(DEVICENAME,"THIS IS DEVICE NAME !!!!!!!!!");
 
 
         //Init Printer
@@ -79,23 +76,27 @@ public class MainActivity extends AppCompatActivity {
         mProgressDialog.setMessage("Loading... ");
         mProgressDialog.show();
 
-
-        WebView webView = findViewById(R.id.webview);
+        Log.d(DEVICENAME,"&&&& THIS IS ON CREATE");
+        webView = findViewById(R.id.webview);
         webView.getSettings().setDomStorageEnabled(true);
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
         webView.getSettings().setAppCacheEnabled(true);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setSupportZoom(false);
-        webView.getSettings().setAppCacheEnabled(true);
+        webView.getSettings().setAppCachePath("/data/data" + getPackageName() + "/cache");
+        webView.getSettings().setSaveFormData(true);
+        webView.getSettings().setDatabaseEnabled(true);
 //        webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         webView.getSettings().setSupportZoom(false);
 
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView,true);
-
+        CookieManager.setAcceptFileSchemeCookies(true);
+//        cookie = CookieManager.getInstance().getCookie(HTTPS_URL);
         webView.loadUrl(HTTPS_URL);
 
         webView.setWebViewClient(new HelloWebViewClient());
+
     }
 
     public void initPos() {
@@ -105,8 +106,8 @@ public class MainActivity extends AppCompatActivity {
         mPosApi.setPrintEventListener (onPrintEventListener);
         mPosApi.openDev ("/dev/ttyS2", 115200, 0);
         mPosApi.setPos ().setAutoEnableMark (false)
-                .setEncode (-1)
-                .setLanguage (2)
+                .setEncode (2)
+                .setLanguage (-1)
                 .setPrintSpeed (-1)
                 .setMarkDistance (-1).init ();// 初始化打印机 init printer
     }
@@ -175,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
         barCodeBean.setConcentration (mConcentration);
         barCodeBean.setHeight (height);
         barCodeBean.setWidth (2);// 条码宽度1-4; Width value 1 2 3 4
-        barCodeBean.setText ("987654321012");
+        barCodeBean.setText ("1");
         //barCodeBean.setText ("2S_201910140122126");
         // barCodeBean.setText ("12345%$()ABcdq");
         barCodeBean.setBarType (BarCode.CODE128);
@@ -200,6 +201,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Log.d(DEVICENAME,"NEW INTENT #####");
+
+        Bundle b = intent.getExtras();
+
+        if (b != null) {
+            String redirect = b.getString("EXTRA_SESSION_URL");
+            Log.d(redirect.toString(), "### REDIRECTING TO...");
+//            webView.loadUrl( "javascript:window.location.reload( true )" );
+//            webView.loadUrl(redirect.toString());
+            if(CookieManager.getInstance().hasCookies()){
+                Log.d(DEVICENAME,"YES HAS COOKIES");
+            }
+            else{
+                Log.d(DEVICENAME,"NO COOKIES");
+            }
+//            CookieManager.getInstance().setCookie(redirect,cookie);
+                webView.loadUrl("javascript:document.open();document.close();");
+                webView.loadUrl(redirect);
+
+        }
+
+    }
+
+
+    @Override
     protected void onResume() {
         super.onResume ();
         if(IsPrinter){
@@ -207,6 +235,11 @@ public class MainActivity extends AppCompatActivity {
             mPosApi.resume ();
             PowerUtils.powerOnOrOff (1, "1");
         }
+
+//        String sessionId = getIntent().getStringExtra("EXTRA_SESSION_ID");
+
+        Log.d(DEVICENAME,"#$$$ RESUMING APPLICATION");
+
 
     }
 
@@ -259,6 +292,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(DEVICENAME,"PRINTER INITIATED!!!!");
 //                print_barcode();
                 print_text();
+//                mPosApi.printFeatureList();
                 mPosApi.printStart ();
             }
         }
