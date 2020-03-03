@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.printer.sdk.PosFactory;
 import android.printer.sdk.bean.BarCodeBean;
+import android.printer.sdk.bean.TextData;
 import android.printer.sdk.bean.enums.ALIGN_MODE;
 import android.printer.sdk.constant.BarCode;
 import android.printer.sdk.interfaces.IPosApi;
@@ -34,8 +35,8 @@ public class MainActivity extends AppCompatActivity {
     private IPosApi mPosApi;
     private int mConcentration=25;
 
-    static private String DEVICEFINGERPRINT = "U9000";
-    static private String DEVICEPRINTER = "S60";
+    private String DEVICEFINGERPRINT = "U9000";
+    private String DEVICEPRINTER = "S60";
 
 
     //Webview stuff
@@ -77,10 +78,9 @@ public class MainActivity extends AppCompatActivity {
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("Loading... ");
         mProgressDialog.show();
-        webView = (WebView) findViewById(R.id.webview);
 
 
-        WebView webView = (WebView) findViewById(R.id.webview);
+        WebView webView = findViewById(R.id.webview);
         webView.getSettings().setDomStorageEnabled(true);
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
@@ -104,7 +104,11 @@ public class MainActivity extends AppCompatActivity {
         mPosApi=PosFactory.getPosDevice (); // 获取打印机实例 get printer driver
         mPosApi.setPrintEventListener (onPrintEventListener);
         mPosApi.openDev ("/dev/ttyS2", 115200, 0);
-        mPosApi.initPos (); // 初始化打印机 init printer
+        mPosApi.setPos ().setAutoEnableMark (false)
+                .setEncode (-1)
+                .setLanguage (2)
+                .setPrintSpeed (-1)
+                .setMarkDistance (-1).init ();// 初始化打印机 init printer
     }
 
     private String getDeviceName(){
@@ -112,9 +116,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void CheckIsPrinter(String DeviceName){
-        if(DeviceName == DEVICEPRINTER)
+        if(DeviceName.equals(DEVICEPRINTER))
             IsPrinter = true;
-        else if (DeviceName == DEVICEFINGERPRINT)
+        else if (DeviceName.equals(DEVICEFINGERPRINT))
             IsPrinter = false;
     }
 
@@ -176,7 +180,23 @@ public class MainActivity extends AppCompatActivity {
         // barCodeBean.setText ("12345%$()ABcdq");
         barCodeBean.setBarType (BarCode.CODE128);
         mPosApi.addBarCode (barCodeBean, ALIGN_MODE.ALIGN_CENTER);
-        mPosApi.addFeedPaper (true, 2);
+        mPosApi.addFeedPaper (true, 3);
+    }
+
+    public void print_text(){
+        TextData textData1=new TextData ();
+        textData1.addConcentration (mConcentration);
+        textData1.addFont (BarCode.FONT_ASCII_12x24);
+        textData1.addTextAlign (BarCode.ALIGN_CENTER);
+        textData1.addFontSize (BarCode.NORMAL);
+        textData1.addText ("what's up");
+        textData1.addText ("\n");
+        textData1.addText ("\n");
+        textData1.addText ("\n");
+        textData1.addText ("\n");
+        textData1.addText ("\n");
+        mPosApi.addText (textData1);
+//        mPosApi.printStart ();
     }
 
     @Override
@@ -236,7 +256,9 @@ public class MainActivity extends AppCompatActivity {
             super.onPageFinished(view, url);
 
             if(IsPrinter){
-                print_barcode();
+                Log.d(DEVICENAME,"PRINTER INITIATED!!!!");
+//                print_barcode();
+                print_text();
                 mPosApi.printStart ();
             }
         }
