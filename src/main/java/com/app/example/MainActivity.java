@@ -25,6 +25,8 @@ import android.webkit.WebViewClient;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.app.example.utils.FingerLib;
+
 import cn.pda.serialport.SerialDriver;
 
 /* printer libraries */
@@ -34,6 +36,9 @@ public class MainActivity extends AppCompatActivity {
     //printer stuff
     private IPosApi mPosApi;
     private int mConcentration=25;
+
+    //finger print stuff
+    private static FingerLib m_szHost;
 
     private String DEVICEFINGERPRINT = "U9000";
     private String DEVICEPRINTER = "S60";
@@ -53,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     static String DEVICENAME;
 
     public boolean IsPrinter = false;
+    public boolean IsFingerPrint = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,12 +71,13 @@ public class MainActivity extends AppCompatActivity {
         CheckIsPrinter(DEVICENAME);
 
 
-             Log.d(DEVICENAME,"THIS IS DEVICE NAME !!!!!!!!!");
 
 
         //Init Printer
         if(IsPrinter)
             initPos ();
+        else if(IsFingerPrint)
+//            m_szHost.SZOEMHost_Lib_Init(this, m_txtStatus, m_FpImageViewer, runEnableCtrl, m_spDevice);
 
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("Loading... ");
@@ -87,17 +94,170 @@ public class MainActivity extends AppCompatActivity {
         webView.getSettings().setAppCachePath("/data/data" + getPackageName() + "/cache");
         webView.getSettings().setSaveFormData(true);
         webView.getSettings().setDatabaseEnabled(true);
-//        webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         webView.getSettings().setSupportZoom(false);
-
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView,true);
         CookieManager.setAcceptFileSchemeCookies(true);
-//        cookie = CookieManager.getInstance().getCookie(HTTPS_URL);
         webView.loadUrl(HTTPS_URL);
 
         webView.setWebViewClient(new HelloWebViewClient());
 
     }
+
+    private String getDeviceName(){
+        return Build.DEVICE;
+    }
+
+
+
+    //HANDLE DEEP LINK
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        Log.d(DEVICENAME,"NEW INTENT #####");
+
+        Uri data = intent.getData();
+        if(data!=null){
+            Log.d(data.toString(),"?>?>> URL NAME !!!!!!!!!");
+
+//            String redirect = b.getString("EXTRA_SESSION_URL");
+                Log.d(data.toString(), "### REDIRECTING TO...");
+//            webView.loadUrl( "javascript:window.location.reload( true )" );
+//            webView.loadUrl(redirect.toString());
+
+//            CookieManager.getInstance().setCookie(redirect,cookie);
+//                webView.loadUrl("javascript:document.open();document.close();");
+                webView.loadUrl(data.toString());
+
+
+        }
+
+
+
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume ();
+        if(IsPrinter){
+            super.onResume ();
+            mPosApi.resume ();
+            PowerUtils.powerOnOrOff (1, "1");
+        }
+
+//        String sessionId = getIntent().getStringExtra("EXTRA_SESSION_ID");
+
+        Log.d(DEVICENAME,"#$$$ RESUMING APPLICATION");
+
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause ();
+        if(IsPrinter){
+            mPosApi.stop ();
+            PowerUtils.powerOnOrOff (1, "0");
+        }
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy ();
+        if(IsPrinter){
+            if (mPosApi != null) {
+                mPosApi.closePos ();
+                mPosApi.closeDev ();
+                PosFactory.Destroy ();
+            }
+            PowerUtils.powerOnOrOff (1, "0");
+        }
+    }
+
+
+    ///WEBVIEW STUFF
+
+    private class HelloWebViewClient extends WebViewClient {
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            if(!url.contains(BASE_HTTPS_URL)){
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(url));
+                startActivity(i);
+                return true;
+            }
+            view.setVisibility(View.GONE);
+            mProgressDialog.show();
+            mProgressDialog.setMessage("Loading...");
+            return false;
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            mProgressDialog.dismiss();
+            view.setVisibility(View.VISIBLE);
+            super.onPageFinished(view, url);
+
+            if(IsPrinter){
+                Log.d(DEVICENAME,"PRINTER INITIATED!!!!");
+//                print_barcode();
+                print_text();
+//                mPosApi.printFeatureList();
+                mPosApi.printStart ();
+            }
+        }
+
+        @Override
+        public void onReceivedSslError(WebView view, final SslErrorHandler handler, SslError error) {
+            if (!isSSLErrorDialogShown) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    AlertDialog alertDialog = builder.create();
+                String message = "SSL Certificate error.";
+                switch (error.getPrimaryError()) {
+                    case SslError.SSL_UNTRUSTED:
+                        message = "The certificate authority is not trusted.";
+                        break;
+                    case SslError.SSL_EXPIRED:
+                        message = "The certificate has expired.";
+                        break;
+                    case SslError.SSL_IDMISMATCH:
+                        message = "The certificate Hostname mismatch.";
+                        break;
+                    case SslError.SSL_NOTYETVALID:
+                        message = "The certificate is not yet valid.";
+                        break;
+                }
+
+                message += " Do you want to continue anyway?";
+                alertDialog.setTitle("SSL Certificate Error");
+                alertDialog.setMessage(message);
+                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Ignore SSL certificate errors
+                        isSSLErrorDialogShown = true;
+                        handler.proceed();
+                    }
+                });
+
+                alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        handler.cancel();
+                    }
+                });
+                alertDialog.show();
+            }else{
+                handler.proceed();
+            }
+        }
+    }
+
+
+    ///PRINTER STUFF
 
     public void initPos() {
         PowerUtils.powerOnOrOff (1, "1");
@@ -112,15 +272,12 @@ public class MainActivity extends AppCompatActivity {
                 .setMarkDistance (-1).init ();// 初始化打印机 init printer
     }
 
-    private String getDeviceName(){
-        return Build.DEVICE;
-    }
 
     private void CheckIsPrinter(String DeviceName){
         if(DeviceName.equals(DEVICEPRINTER))
             IsPrinter = true;
         else if (DeviceName.equals(DEVICEFINGERPRINT))
-            IsPrinter = false;
+            IsFingerPrint = true;
     }
 
 
@@ -200,149 +357,17 @@ public class MainActivity extends AppCompatActivity {
 //        mPosApi.printStart ();
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        Log.d(DEVICENAME,"NEW INTENT #####");
-
-        Bundle b = intent.getExtras();
-
-        if (b != null) {
-            String redirect = b.getString("EXTRA_SESSION_URL");
-            Log.d(redirect.toString(), "### REDIRECTING TO...");
-//            webView.loadUrl( "javascript:window.location.reload( true )" );
-//            webView.loadUrl(redirect.toString());
-            if(CookieManager.getInstance().hasCookies()){
-                Log.d(DEVICENAME,"YES HAS COOKIES");
-            }
-            else{
-                Log.d(DEVICENAME,"NO COOKIES");
-            }
-//            CookieManager.getInstance().setCookie(redirect,cookie);
-                webView.loadUrl("javascript:document.open();document.close();");
-                webView.loadUrl(redirect);
-
-        }
-
-    }
 
 
-    @Override
-    protected void onResume() {
-        super.onResume ();
-        if(IsPrinter){
-            super.onResume ();
-            mPosApi.resume ();
-            PowerUtils.powerOnOrOff (1, "1");
-        }
+    ///FINGER PRINT READER STUFF
 
-//        String sessionId = getIntent().getStringExtra("EXTRA_SESSION_ID");
-
-        Log.d(DEVICENAME,"#$$$ RESUMING APPLICATION");
-
-
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause ();
-        if(IsPrinter){
-            mPosApi.stop ();
-            PowerUtils.powerOnOrOff (1, "0");
-        }
-    }
-
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy ();
-        if(IsPrinter){
-            if (mPosApi != null) {
-                mPosApi.closePos ();
-                mPosApi.closeDev ();
-                PosFactory.Destroy ();
-            }
-            PowerUtils.powerOnOrOff (1, "0");
-        }
-    }
-
-
-    private class HelloWebViewClient extends WebViewClient {
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            if(!url.contains(BASE_HTTPS_URL)){
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse(url));
-                startActivity(i);
-                return true;
-            }
-            view.setVisibility(View.GONE);
-            mProgressDialog.show();
-            mProgressDialog.setMessage("Loading...");
-            return false;
-        }
-
-        @Override
-        public void onPageFinished(WebView view, String url) {
-            mProgressDialog.dismiss();
-            view.setVisibility(View.VISIBLE);
-            super.onPageFinished(view, url);
-
-            if(IsPrinter){
-                Log.d(DEVICENAME,"PRINTER INITIATED!!!!");
-//                print_barcode();
-                print_text();
-//                mPosApi.printFeatureList();
-                mPosApi.printStart ();
-            }
-        }
-
-        @Override
-        public void onReceivedSslError(WebView view, final SslErrorHandler handler, SslError error) {
-            if (!isSSLErrorDialogShown) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    AlertDialog alertDialog = builder.create();
-                String message = "SSL Certificate error.";
-                switch (error.getPrimaryError()) {
-                    case SslError.SSL_UNTRUSTED:
-                        message = "The certificate authority is not trusted.";
-                        break;
-                    case SslError.SSL_EXPIRED:
-                        message = "The certificate has expired.";
-                        break;
-                    case SslError.SSL_IDMISMATCH:
-                        message = "The certificate Hostname mismatch.";
-                        break;
-                    case SslError.SSL_NOTYETVALID:
-                        message = "The certificate is not yet valid.";
-                        break;
-                }
-
-                message += " Do you want to continue anyway?";
-                alertDialog.setTitle("SSL Certificate Error");
-                alertDialog.setMessage(message);
-                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // Ignore SSL certificate errors
-                        isSSLErrorDialogShown = true;
-                        handler.proceed();
-                    }
-                });
-
-                alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        handler.cancel();
-                    }
-                });
-                alertDialog.show();
-            }else{
-                handler.proceed();
-            }
-        }
-    }
+//    public void OnOpenDeviceBtn() {
+//        if (m_szHost.OpenDevice(m_szDevice, m_nBaudrate) == 0) {
+//            EnableCtrl(true);
+//            m_btnOpenDevice.setEnabled(false);
+//            m_btnCloseDevice.setEnabled(true);
+//        }
+//    }
 
 
 //    private void startWebView(String url) {

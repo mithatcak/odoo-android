@@ -14,30 +14,45 @@
         android:usesCleartextTraffic="true"
         android:theme="@style/AppTheme.NoActionBar">
         <activity android:name=".MainActivity"
+            android:label="Odoo"
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-                <data android:scheme="https"
-                    android:host="erp-dev.dullesglass.com"
-                    android:pathPrefix="/mail" />
-                <!-- note that the leading "/" is required for pathPrefix-->
             </intent-filter>
-        </activity>
-        <activity
-            android:name=".DeepLinkActivity"
-            android:label="Odoo" >
-            <intent-filter android:label="Odoo">
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with "http://www.example.com/gizmos” -->
                 <data android:scheme="https"
                     android:host="erp-dev.dullesglass.com"
                     android:pathPrefix="/mail" />
                 <!-- note that the leading "/" is required for pathPrefix-->
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https"
+                    android:host="erp.troysys.com"
+                    android:pathPrefix="/mail" />
+                <!-- note that the leading "/" is required for pathPrefix-->
+            </intent-filter>
         </activity>
+<!--        <activity-->
+<!--            android:name=".DeepLinkActivity"-->
+<!--            android:label="Odoo" >-->
+<!--            <intent-filter android:label="Odoo">-->
+<!--                <action android:name="android.intent.action.VIEW" />-->
+<!--                <category android:name="android.intent.category.DEFAULT" />-->
+<!--                <category android:name="android.intent.category.BROWSABLE" />-->
+<!--                &lt;!&ndash; Accepts URIs that begin with "http://www.example.com/gizmos” &ndash;&gt;-->
+<!--                <data android:scheme="https"-->
+<!--                    android:host="erp-dev.dullesglass.com"-->
+<!--                    android:pathPrefix="/mail" />-->
+<!--                &lt;!&ndash; note that the leading "/" is required for pathPrefix&ndash;&gt;-->
+<!--            </intent-filter>-->
+<!--        </activity>-->
         <activity android:name=".LoginActivity"></activity>
     </application>
 
