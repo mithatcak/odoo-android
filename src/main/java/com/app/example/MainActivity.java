@@ -25,7 +25,7 @@ import android.webkit.WebViewClient;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.app.example.utils.FingerLib;
+//import com.app.example.utils.FingerLib;
 
 import cn.pda.serialport.SerialDriver;
 
@@ -38,27 +38,22 @@ public class MainActivity extends AppCompatActivity {
     private int mConcentration=25;
 
     //finger print stuff
-    private static FingerLib m_szHost;
+//    private static FingerLib m_szHost;
 
-    private String DEVICEFINGERPRINT = "U9000";
-    private String DEVICEPRINTER = "S60";
-
-
-    //Webview stuff
-    private WebView webView;
-    ProgressDialog mProgressDialog;
-
-    private String HTTPS_URL = BuildConfig.SERVER_URL;
-    private String BASE_HTTPS_URL = BuildConfig.SERVER_BASE_URL;
-
-    private String cookie;
-
-    private boolean isSSLErrorDialogShown = false;
-
-    static String DEVICENAME;
-
+    //DEVICE MANAGEMENT
+    private final static String DEVICE_FINGER_PRINT = "U9000";
+    private final static String DEVICE_PRINTER = "S60";
+    static String DEVICE_NAME;
     public boolean IsPrinter = false;
     public boolean IsFingerPrint = false;
+
+    //WebView stuff
+    private WebView webView;
+    ProgressDialog mProgressDialog;
+    private String HTTPS_URL = BuildConfig.SERVER_URL;
+    private String BASE_HTTPS_URL = BuildConfig.SERVER_BASE_URL;
+    private boolean isSSLErrorDialogShown = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,23 +62,20 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         //Check Device Compatible with Printer
-        DEVICENAME = getDeviceName();
-        CheckIsPrinter(DEVICENAME);
-
-
-
+        DEVICE_NAME = getDeviceName();
+        SetDeviceType(DEVICE_NAME);
 
         //Init Printer
         if(IsPrinter)
             initPos ();
-        else if(IsFingerPrint)
+//        else if(IsFingerPrint)
 //            m_szHost.SZOEMHost_Lib_Init(this, m_txtStatus, m_FpImageViewer, runEnableCtrl, m_spDevice);
 
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("Loading... ");
         mProgressDialog.show();
 
-        Log.d(DEVICENAME,"&&&& THIS IS ON CREATE");
+        Log.d(DEVICE_NAME,"&&&& THIS IS ON CREATE");
         webView = findViewById(R.id.webview);
         webView.getSettings().setDomStorageEnabled(true);
         webView.setVerticalScrollBarEnabled(false);
@@ -114,26 +106,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        Log.d(DEVICENAME,"NEW INTENT #####");
 
         Uri data = intent.getData();
         if(data!=null){
-            Log.d(data.toString(),"?>?>> URL NAME !!!!!!!!!");
-
-//            String redirect = b.getString("EXTRA_SESSION_URL");
-                Log.d(data.toString(), "### REDIRECTING TO...");
-//            webView.loadUrl( "javascript:window.location.reload( true )" );
-//            webView.loadUrl(redirect.toString());
-
-//            CookieManager.getInstance().setCookie(redirect,cookie);
-//                webView.loadUrl("javascript:document.open();document.close();");
-                webView.loadUrl(data.toString());
-
-
+            webView.loadUrl(data.toString());
         }
-
-
-
     }
 
 
@@ -145,12 +122,6 @@ public class MainActivity extends AppCompatActivity {
             mPosApi.resume ();
             PowerUtils.powerOnOrOff (1, "1");
         }
-
-//        String sessionId = getIntent().getStringExtra("EXTRA_SESSION_ID");
-
-        Log.d(DEVICENAME,"#$$$ RESUMING APPLICATION");
-
-
     }
 
     @Override
@@ -177,8 +148,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    ///WEBVIEW STUFF
-
+    ///WebView Stuff
     private class HelloWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -201,8 +171,8 @@ public class MainActivity extends AppCompatActivity {
             super.onPageFinished(view, url);
 
             if(IsPrinter){
-                Log.d(DEVICENAME,"PRINTER INITIATED!!!!");
-//                print_barcode();
+                Log.d(DEVICE_NAME,"PRINTER INITIATED!!!!");
+                print_barcode();
                 print_text();
 //                mPosApi.printFeatureList();
                 mPosApi.printStart ();
@@ -257,8 +227,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    ///PRINTER STUFF
-
+    ///Printer Stuff
     public void initPos() {
         PowerUtils.powerOnOrOff (1, "1");
         PosFactory.registerCommunicateDriver (this, new SerialDriver ()); // 注册串口类 Register serial driver
@@ -266,17 +235,17 @@ public class MainActivity extends AppCompatActivity {
         mPosApi.setPrintEventListener (onPrintEventListener);
         mPosApi.openDev ("/dev/ttyS2", 115200, 0);
         mPosApi.setPos ().setAutoEnableMark (false)
-                .setEncode (2)
+                .setEncode (-1)
                 .setLanguage (-1)
                 .setPrintSpeed (-1)
                 .setMarkDistance (-1).init ();// 初始化打印机 init printer
     }
 
 
-    private void CheckIsPrinter(String DeviceName){
-        if(DeviceName.equals(DEVICEPRINTER))
+    private void SetDeviceType(String DeviceName){
+        if(DeviceName.equals(DEVICE_PRINTER))
             IsPrinter = true;
-        else if (DeviceName.equals(DEVICEFINGERPRINT))
+        else if (DeviceName.equals(DEVICE_FINGER_PRINT))
             IsFingerPrint = true;
     }
 
@@ -307,22 +276,6 @@ public class MainActivity extends AppCompatActivity {
             }
             alertDialog.setTitle("Printer Status");
             alertDialog.setMessage(message);
-//            alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
-//                @Override
-//                public void onClick(DialogInterface dialog, int which) {
-//                    // Ignore SSL certificate errors
-//                    isSSLErrorDialogShown = true;
-//                    handler.proceed();
-//                }
-//            });
-//
-//            alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
-//                @Override
-//                public void onClick(DialogInterface dialog, int which) {
-//
-//                    handler.cancel();
-//                }
-//            });
             alertDialog.show();
         }
     };
@@ -333,12 +286,23 @@ public class MainActivity extends AppCompatActivity {
         barCodeBean.setConcentration (mConcentration);
         barCodeBean.setHeight (height);
         barCodeBean.setWidth (2);// 条码宽度1-4; Width value 1 2 3 4
-        barCodeBean.setText ("1");
-        //barCodeBean.setText ("2S_201910140122126");
-        // barCodeBean.setText ("12345%$()ABcdq");
+        barCodeBean.setText ("12345678");
         barCodeBean.setBarType (BarCode.CODE128);
         mPosApi.addBarCode (barCodeBean, ALIGN_MODE.ALIGN_CENTER);
         mPosApi.addFeedPaper (true, 3);
+    }
+
+    public void print_space(){
+        TextData textData1=new TextData ();
+        textData1.addConcentration (mConcentration);
+        textData1.addFont (BarCode.FONT_ASCII_12x24);
+        textData1.addTextAlign (BarCode.ALIGN_CENTER);
+        textData1.addFontSize (BarCode.NORMAL);
+        textData1.addText ("\n");
+        textData1.addText ("\n");
+        textData1.addText ("\n");
+        textData1.addText ("\n");
+        mPosApi.addText (textData1);
     }
 
     public void print_text(){
@@ -347,14 +311,15 @@ public class MainActivity extends AppCompatActivity {
         textData1.addFont (BarCode.FONT_ASCII_12x24);
         textData1.addTextAlign (BarCode.ALIGN_CENTER);
         textData1.addFontSize (BarCode.NORMAL);
-        textData1.addText ("what's up");
         textData1.addText ("\n");
         textData1.addText ("\n");
         textData1.addText ("\n");
         textData1.addText ("\n");
+        textData1.addText ("Order: ONL123456");
         textData1.addText ("\n");
+        textData1.addText ("Customer: Mithat Cakmak");
         mPosApi.addText (textData1);
-//        mPosApi.printStart ();
+        mPosApi.printStart ();
     }
 
 
