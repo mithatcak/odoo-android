@@ -4,4 +4,7 @@
     <string name="email">email</string>
     <string name="login">LOGIN</string>
     <string name="forgot_password">forgot password</string>
+    <string name="dev_host">erp-dev.dullesglass.com</string>
+    <string name="prod_host">erp.troysys.com</string>
+
 </resources>
