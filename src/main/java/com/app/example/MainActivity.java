@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
                 print_barcode();
                 print_text();
 //                mPosApi.printFeatureList();
-                mPosApi.printStart ();
+//                mPosApi.printStart ();
             }
         }
 
@@ -290,19 +290,7 @@ public class MainActivity extends AppCompatActivity {
         barCodeBean.setBarType (BarCode.CODE128);
         mPosApi.addBarCode (barCodeBean, ALIGN_MODE.ALIGN_CENTER);
         mPosApi.addFeedPaper (true, 3);
-    }
-
-    public void print_space(){
-        TextData textData1=new TextData ();
-        textData1.addConcentration (mConcentration);
-        textData1.addFont (BarCode.FONT_ASCII_12x24);
-        textData1.addTextAlign (BarCode.ALIGN_CENTER);
-        textData1.addFontSize (BarCode.NORMAL);
-        textData1.addText ("\n");
-        textData1.addText ("\n");
-        textData1.addText ("\n");
-        textData1.addText ("\n");
-        mPosApi.addText (textData1);
+        mPosApi.printStart ();
     }
 
     public void print_text(){
@@ -313,16 +301,18 @@ public class MainActivity extends AppCompatActivity {
         textData1.addFontSize (BarCode.NORMAL);
         textData1.addText ("\n");
         textData1.addText ("\n");
-        textData1.addText ("\n");
-        textData1.addText ("\n");
         textData1.addText ("Order: ONL123456");
         textData1.addText ("\n");
         textData1.addText ("Customer: Mithat Cakmak");
+        textData1.addText ("\n");
+        textData1.addText ("\n");
+        textData1.addText ("\n");
+        textData1.addText ("\n");
+        textData1.addText ("\n");
+        textData1.addText ("\n");
         mPosApi.addText (textData1);
         mPosApi.printStart ();
     }
-
-
 
     ///FINGER PRINT READER STUFF
 
@@ -334,51 +324,4 @@ public class MainActivity extends AppCompatActivity {
 //        }
 //    }
 
-
-//    private void startWebView(String url) {
-//
-//        WebSettings settings = webView.getSettings();
-//
-//        settings.setJavaScriptEnabled(true);
-//        webView.setScrollBarStyle(View.SCROLLBARS_OUTSIDE_OVERLAY);
-//
-//        webView.getSettings().setBuiltInZoomControls(true);
-//        webView.getSettings().setUseWideViewPort(true);
-//        webView.getSettings().setLoadWithOverviewMode(true);
-//        webView.getSettings().setAppCacheEnabled(true);
-//        webView.getSettings().setUseWideViewPort(false);
-//        webView.getSettings().setSupportZoom(false);
-//
-//        progressDialog = new ProgressDialog(this);
-//        progressDialog.setMessage("Loading...");
-//        progressDialog.show();
-//
-//        webView.setWebViewClient(new WebViewClient() {
-//            @Override
-//            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-//                view.loadUrl(url);
-//                return true;
-//            }
-//
-//            @Override
-//            public void onPageFinished(WebView view, String url) {
-//                if (progressDialog.isShowing()) {
-//                    progressDialog.dismiss();
-//                }
-//            }
-//
-//            @Override
-//            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-//                Toast.makeText(MainActivity.this, "Error:" + description, Toast.LENGTH_SHORT).show();
-//
-//            }
-//
-//            @Override
-//            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-////                super.onReceivedSslError(view, handler, error);
-//                handler.proceed();
-//            }
-//        });
-//        webView.loadUrl(url);
-//    }
 }
