@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private String HTTPS_URL = BuildConfig.SERVER_URL;
     private String BASE_HTTPS_URL = BuildConfig.SERVER_BASE_URL;
     private boolean isSSLErrorDialogShown = false;
+    private String PRINT_LABEL = "print=yes";
 
 
     @Override
@@ -66,8 +67,10 @@ public class MainActivity extends AppCompatActivity {
         SetDeviceType(DEVICE_NAME);
 
         //Init Printer
-        if(IsPrinter)
+        if(IsPrinter){
+            Log.d(DEVICE_NAME,"PRINTER INITIATED!!!!");
             initPos ();
+        }
 //        else if(IsFingerPrint)
 //            m_szHost.SZOEMHost_Lib_Init(this, m_txtStatus, m_FpImageViewer, runEnableCtrl, m_spDevice);
 
@@ -75,7 +78,6 @@ public class MainActivity extends AppCompatActivity {
         mProgressDialog.setMessage("Loading... ");
         mProgressDialog.show();
 
-        Log.d(DEVICE_NAME,"&&&& THIS IS ON CREATE");
         webView = findViewById(R.id.webview);
         webView.getSettings().setDomStorageEnabled(true);
         webView.setVerticalScrollBarEnabled(false);
@@ -168,15 +170,19 @@ public class MainActivity extends AppCompatActivity {
         public void onPageFinished(WebView view, String url) {
             mProgressDialog.dismiss();
             view.setVisibility(View.VISIBLE);
-            super.onPageFinished(view, url);
 
-            if(IsPrinter){
-                Log.d(DEVICE_NAME,"PRINTER INITIATED!!!!");
-                print_barcode();
-                print_text();
-//                mPosApi.printFeatureList();
-//                mPosApi.printStart ();
+            //Check if URL asks for label printing
+            if(url.contains(PRINT_LABEL)){
+                if(IsPrinter){
+
+                    print_barcode();
+                    print_text();
+                }
+                else{
+                    Log.d(DEVICE_NAME,"CAN'T INITIATE PRINTER!!!!");
+                }
             }
+            super.onPageFinished(view, url);
         }
 
         @Override
