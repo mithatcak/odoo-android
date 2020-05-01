@@ -25,9 +25,13 @@ import android.webkit.WebViewClient;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-//import com.app.example.utils.FingerLib;
+//import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import cn.pda.serialport.SerialDriver;
+
+//import com.app.example.utils.FingerLib;
 
 /* printer libraries */
 
@@ -174,9 +178,9 @@ public class MainActivity extends AppCompatActivity {
             //Check if URL asks for label printing
             if(url.contains(PRINT_LABEL)){
                 if(IsPrinter){
-
-                    print_barcode();
-                    print_text();
+                    printLabel(parseLabelInfo(url));
+//                    print_barcode();
+//                    print_text();
                 }
                 else{
                     Log.d(DEVICE_NAME,"CAN'T INITIATE PRINTER!!!!");
@@ -230,6 +234,23 @@ public class MainActivity extends AppCompatActivity {
                 handler.proceed();
             }
         }
+    }
+
+
+    public Map<String, String> parseLabelInfo(String url){
+        Map<String, String> label = new HashMap<>();
+        Uri uri = Uri.parse(url);
+
+        Set<String> paramNames = uri.getQueryParameterNames();
+        for (String key: paramNames) {
+            String value = uri.getQueryParameter(key);
+            label.put(key,value);
+        }
+         return label;
+    }
+
+    public void printLabel(Map<String, String> label){
+        print_text(label);
     }
 
 
@@ -299,23 +320,31 @@ public class MainActivity extends AppCompatActivity {
         mPosApi.printStart ();
     }
 
-    public void print_text(){
+    public void print_text(Map<String,String> label){
         TextData textData1=new TextData ();
         textData1.addConcentration (mConcentration);
         textData1.addFont (BarCode.FONT_ASCII_12x24);
         textData1.addTextAlign (BarCode.ALIGN_CENTER);
         textData1.addFontSize (BarCode.NORMAL);
-        textData1.addText ("\n");
-        textData1.addText ("\n");
-        textData1.addText ("Order: ONL123456");
-        textData1.addText ("\n");
-        textData1.addText ("Customer: Mithat Cakmak");
-        textData1.addText ("\n");
-        textData1.addText ("\n");
-        textData1.addText ("\n");
-        textData1.addText ("\n");
-        textData1.addText ("\n");
-        textData1.addText ("\n");
+        textData1.addText("\n");
+        textData1.addText("\n");
+        textData1.addText("test print");
+        textData1.addText("\n");
+        textData1.addText("\n");
+        textData1.addText("\n");
+        textData1.addText("\n");
+        for (Map.Entry<String, String> entry : label.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            textData1.addText("\n");
+            textData1.addText("\n");
+            textData1.addText(key + ": " + value);
+            Log.d(value,"PRINTER INITIATED!!!!");
+            textData1.addText("\n");
+            textData1.addText("\n");
+            textData1.addText("\n");
+            textData1.addText("\n");
+        }
         mPosApi.addText (textData1);
         mPosApi.printStart ();
     }
