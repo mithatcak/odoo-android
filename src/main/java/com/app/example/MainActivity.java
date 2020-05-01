@@ -57,7 +57,9 @@ public class MainActivity extends AppCompatActivity {
     private String HTTPS_URL = BuildConfig.SERVER_URL;
     private String BASE_HTTPS_URL = BuildConfig.SERVER_BASE_URL;
     private boolean isSSLErrorDialogShown = false;
-    private String PRINT_LABEL = "print=yes";
+    private final static String PRINT_LABEL = "print=yes";
+    private final static String BARCODE_KEY = "MO";
+    private final static String PRINT_FLAG = "print";
 
 
     @Override
@@ -174,13 +176,13 @@ public class MainActivity extends AppCompatActivity {
         public void onPageFinished(WebView view, String url) {
             mProgressDialog.dismiss();
             view.setVisibility(View.VISIBLE);
-
+            
             //Check if URL asks for label printing
             if(url.contains(PRINT_LABEL)){
                 if(IsPrinter){
-                    printLabel(parseLabelInfo(url));
-//                    print_barcode();
-//                    print_text();
+                    mProgressDialog.show();
+                    mProgressDialog.setMessage("Printing...");
+                    parseAndPrintLabelInfo(url);
                 }
                 else{
                     Log.d(DEVICE_NAME,"CAN'T INITIATE PRINTER!!!!");
@@ -236,19 +238,33 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void SetDeviceType(String DeviceName){
+        if(DeviceName.equals(DEVICE_PRINTER))
+            IsPrinter = true;
+        else if (DeviceName.equals(DEVICE_FINGER_PRINT))
+            IsFingerPrint = true;
+    }
 
-    public Map<String, String> parseLabelInfo(String url){
+    //Parse params from URL then print label
+    public void parseAndPrintLabelInfo(String url){
         Map<String, String> label = new HashMap<>();
         Uri uri = Uri.parse(url);
 
         Set<String> paramNames = uri.getQueryParameterNames();
         for (String key: paramNames) {
             String value = uri.getQueryParameter(key);
-            label.put(key,value);
+            if(key.equals(BARCODE_KEY)) {
+                print_barcode(value);
+            }
+            else if(!key.equals(PRINT_FLAG)){
+                label.put(key,value);
+            }
         }
-         return label;
+        printLabel(label);
+        mProgressDialog.dismiss();
     }
 
+    //Print label text
     public void printLabel(Map<String, String> label){
         print_text(label);
     }
@@ -269,16 +285,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void SetDeviceType(String DeviceName){
-        if(DeviceName.equals(DEVICE_PRINTER))
-            IsPrinter = true;
-        else if (DeviceName.equals(DEVICE_FINGER_PRINT))
-            IsFingerPrint = true;
-    }
-
-
     public OnPrintEventListener onPrintEventListener=new OnPrintEventListener () {
-
         String message = "Printer Status";
         @Override
         public void onPrintState(int state) {
@@ -307,13 +314,13 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    public void print_barcode() {
+    public void print_barcode(String input) {
         int height=80;
         BarCodeBean barCodeBean=new BarCodeBean ();
         barCodeBean.setConcentration (mConcentration);
         barCodeBean.setHeight (height);
         barCodeBean.setWidth (2);// 条码宽度1-4; Width value 1 2 3 4
-        barCodeBean.setText ("12345678");
+        barCodeBean.setText (input);
         barCodeBean.setBarType (BarCode.CODE128);
         mPosApi.addBarCode (barCodeBean, ALIGN_MODE.ALIGN_CENTER);
         mPosApi.addFeedPaper (true, 3);
@@ -326,25 +333,15 @@ public class MainActivity extends AppCompatActivity {
         textData1.addFont (BarCode.FONT_ASCII_12x24);
         textData1.addTextAlign (BarCode.ALIGN_CENTER);
         textData1.addFontSize (BarCode.NORMAL);
-        textData1.addText("\n");
-        textData1.addText("\n");
-        textData1.addText("test print");
-        textData1.addText("\n");
-        textData1.addText("\n");
-        textData1.addText("\n");
-        textData1.addText("\n");
         for (Map.Entry<String, String> entry : label.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            textData1.addText("\n");
-            textData1.addText("\n");
             textData1.addText(key + ": " + value);
-            Log.d(value,"PRINTER INITIATED!!!!");
-            textData1.addText("\n");
-            textData1.addText("\n");
-            textData1.addText("\n");
             textData1.addText("\n");
         }
+        textData1.addText("\n");
+        textData1.addText("\n");
+        textData1.addText("\n");
         mPosApi.addText (textData1);
         mPosApi.printStart ();
     }
