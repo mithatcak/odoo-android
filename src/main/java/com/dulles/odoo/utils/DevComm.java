@@ -1,4 +1,4 @@
-package com.app.example.utils;
+package com.dulles.odoo.utils;
 
 import android.content.Context;
 import android.hardware.usb.UsbManager;
@@ -6,9 +6,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.app.example.SerialHelper;
-import com.app.example.SerialPortFinder;
-import com.app.example.bean.ComBean;
+import com.dulles.odoo.SerialHelper;
+import com.dulles.odoo.SerialPortFinder;
+import com.dulles.odoo.bean.ComBean;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;

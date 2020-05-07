@@ -1,4 +1,4 @@
-package com.app.example;
+package com.dulles.odoo;
 
 import android.content.Intent;
 import android.os.Bundle;

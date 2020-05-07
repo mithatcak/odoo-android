@@ -1,4 +1,4 @@
-package com.app.example.utils;
+package com.dulles.odoo.utils;
 
 public class SerialBuf {
     private int m_nReadPos = 0;

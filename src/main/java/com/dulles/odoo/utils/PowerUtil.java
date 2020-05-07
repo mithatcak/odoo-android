@@ -1,4 +1,4 @@
-package com.app.example.utils;
+package com.dulles.odoo.utils;
 
 import java.io.File;
 import java.io.FileWriter;

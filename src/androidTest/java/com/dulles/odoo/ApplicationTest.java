@@ -1,4 +1,4 @@
-package com.app.example;
+package com.dulles.odoo;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

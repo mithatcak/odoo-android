@@ -1,4 +1,4 @@
-package com.app.example.bean;
+package com.dulles.odoo.bean;
 
 /**
  * @author benjaminwan

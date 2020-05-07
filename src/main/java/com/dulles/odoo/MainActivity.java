@@ -1,4 +1,4 @@
-package com.app.example;
+package com.dulles.odoo;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -176,7 +176,9 @@ public class MainActivity extends AppCompatActivity {
         public void onPageFinished(WebView view, String url) {
             mProgressDialog.dismiss();
             view.setVisibility(View.VISIBLE);
-            
+            parseAndPrintLabelInfo("https://dev.troysys.com/barcode_scanner_interface_mobile/static/www/index.html?print=yes&MO=MO/42222-1/1&O=TRY/INT/54555&C=Jerry\\Granata&S=FedEx\\Ground&D=2020-04-23&Prime=false&Rush=true&Reorder=true#/batch_scan_product/101/268481");
+
+
             //Check if URL asks for label printing
             if(url.contains(PRINT_LABEL)){
                 if(IsPrinter){
@@ -260,13 +262,9 @@ public class MainActivity extends AppCompatActivity {
                 label.put(key,value);
             }
         }
-        printLabel(label);
-        mProgressDialog.dismiss();
-    }
-
-    //Print label text
-    public void printLabel(Map<String, String> label){
         print_text(label);
+        mPosApi.printStart ();
+        mProgressDialog.dismiss();
     }
 
 
@@ -323,8 +321,7 @@ public class MainActivity extends AppCompatActivity {
         barCodeBean.setText (input);
         barCodeBean.setBarType (BarCode.CODE128);
         mPosApi.addBarCode (barCodeBean, ALIGN_MODE.ALIGN_CENTER);
-        mPosApi.addFeedPaper (true, 3);
-        mPosApi.printStart ();
+        mPosApi.addFeedPaper (true, 1);
     }
 
     public void print_text(Map<String,String> label){
@@ -336,14 +333,21 @@ public class MainActivity extends AppCompatActivity {
         for (Map.Entry<String, String> entry : label.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            textData1.addText(key + ": " + value);
-            textData1.addText("\n");
+            if(value.equals("true")) {
+                textData1.addText(key);
+                textData1.addText("\n");
+            }
+            else if(!value.equals("false")){
+                value = value.replace("\\\\", " ");
+                textData1.addText(key + ": " + value);
+                textData1.addText("\n");
+            }
         }
         textData1.addText("\n");
         textData1.addText("\n");
         textData1.addText("\n");
+        textData1.addText("\n");
         mPosApi.addText (textData1);
-        mPosApi.printStart ();
     }
 
     ///FINGER PRINT READER STUFF

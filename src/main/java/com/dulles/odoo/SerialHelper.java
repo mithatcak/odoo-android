@@ -1,9 +1,9 @@
-package com.app.example;
+package com.dulles.odoo;
 
 import android.util.Log;
 
-import com.app.example.bean.ComBean;
-import com.app.example.utils.DevComm;
+import com.dulles.odoo.bean.ComBean;
+import com.dulles.odoo.utils.DevComm;
 
 import java.io.File;
 import java.io.IOException;

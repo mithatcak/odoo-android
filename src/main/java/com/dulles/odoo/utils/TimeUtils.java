@@ -1,4 +1,4 @@
-package com.app.example.utils;
+package com.dulles.odoo.utils;
 
 public class TimeUtils {
     private static long lastClickTime;

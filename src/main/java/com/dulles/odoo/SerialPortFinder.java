@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.app.example;
+package com.dulles.odoo;
 
 import android.util.Log;
 import java.io.File;
