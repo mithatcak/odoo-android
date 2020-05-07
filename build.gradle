@@ -6,12 +6,16 @@ buildscript {
             url 'https://maven.google.com/'
             name 'Google'
         }
+        google()  // Google's Maven repository
         //mavenCentral()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.1'
+        classpath 'com.google.gms:google-services:4.3.3'
     }
 }
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.android.application'
 
 repositories {
@@ -26,7 +30,6 @@ repositories {
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "23.0.1"
 
     defaultConfig {
         applicationId "com.dulles.odoo"
@@ -38,7 +41,6 @@ android {
     }
     buildTypes {
             debug {
-                applicationIdSuffix ".debug"
                 debuggable true
                 buildConfigField "String", "SERVER_URL", '"https://dev.troysys.com/barcode_scanner_interface_mobile/static/www/index.html#/login"'
                 buildConfigField "String", "SERVER_BASE_URL", '"dev.troysys.com/barcode_scanner_interface_mobile/static/www/index.html"'
@@ -53,9 +55,10 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    compile 'org.apache.httpcomponents:httpcore:4.4.1'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+//    testCompile 'junit:junit:4.12'
+//    compile 'org.apache.httpcomponents:httpcore:4.4.1'
     implementation "androidx.appcompat:appcompat:1.1.0"
-    compile 'com.android.volley:volley:1.1.1'
+    implementation 'com.google.firebase:firebase-analytics:17.2.2'
+//    compile 'com.android.volley:volley:1.1.1'
 }

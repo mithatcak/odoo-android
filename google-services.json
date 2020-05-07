@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "554058498873",
+    "firebase_url": "https://odoo-android-3ba95.firebaseio.com",
+    "project_id": "odoo-android-3ba95",
+    "storage_bucket": "odoo-android-3ba95.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:554058498873:android:0a93d3f0210ff24fe51ee8",
+        "android_client_info": {
+          "package_name": "com.dulles.odoo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "554058498873-q7kbf86hrrq7gth8k7346bo5tht5g09n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCh8DeohJ9DHoq9Y5eOCMgFwnRi6aG9DVE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "554058498873-q7kbf86hrrq7gth8k7346bo5tht5g09n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

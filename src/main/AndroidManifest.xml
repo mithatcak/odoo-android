@@ -39,7 +39,6 @@
                 <!-- note that the leading "/" is required for pathPrefix-->
             </intent-filter>
         </activity>
-        <activity android:name="com.dulles.odoo.LoginActivity"></activity>
     </application>
 
 </manifest>
