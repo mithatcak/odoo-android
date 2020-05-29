@@ -298,7 +298,6 @@ public class MainActivity extends AppCompatActivity {
                     message = "Error. No paper.";
                     break;
                 case 4:
-
                     break;
             }
             alertDialog.setTitle("Printer Status");
