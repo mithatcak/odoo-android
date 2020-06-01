@@ -176,7 +176,6 @@ public class MainActivity extends AppCompatActivity {
         public void onPageFinished(WebView view, String url) {
             mProgressDialog.dismiss();
             view.setVisibility(View.VISIBLE);
-            parseAndPrintLabelInfo("https://dev.troysys.com/barcode_scanner_interface_mobile/static/www/index.html?print=yes&MO=MO/42222-1/1&O=TRY/INT/54555&C=Jerry\\Granata&S=FedEx\\Ground&D=2020-04-23&Prime=false&Rush=true&Reorder=true#/batch_scan_product/101/268481");
 
             //Check if URL asks for label printing
             if(url.contains(PRINT_LABEL)){
