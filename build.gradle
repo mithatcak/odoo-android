@@ -28,6 +28,12 @@ repositories {
     }
 }
 
+allprojects {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    }
+}
+
 
 android {
     compileSdkVersion 29
