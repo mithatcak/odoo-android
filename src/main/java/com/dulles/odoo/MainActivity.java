@@ -8,14 +8,6 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
-import android.printer.sdk.PosFactory;
-import android.printer.sdk.bean.BarCodeBean;
-import android.printer.sdk.bean.TextData;
-import android.printer.sdk.bean.enums.ALIGN_MODE;
-import android.printer.sdk.constant.BarCode;
-import android.printer.sdk.interfaces.IPosApi;
-import android.printer.sdk.interfaces.OnPrintEventListener;
-import android.printer.sdk.util.PowerUtils;
 import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
@@ -23,23 +15,37 @@ import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import cn.pda.serialport.SerialDriver;
 
-//import com.app.example.utils.FingerLib;
+
 
 /* printer libraries */
+import android.printer.sdk.PosFactory;
+import android.printer.sdk.bean.TextData;
+import android.printer.sdk.constant.BarCode;
+import android.printer.sdk.interfaces.IPosApi;
+import android.printer.sdk.interfaces.OnPrintEventListener;
+import android.printer.sdk.util.PowerUtils;
+import android.printer.sdk.bean.BarCodeBean;
+import android.printer.sdk.bean.enums.ALIGN_MODE;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+
+
+/*fingerprint library*/
+//import com.app.example.utils.FingerLib;
+
+
 
 public class MainActivity extends AppCompatActivity {
 
     //printer stuff
     private IPosApi mPosApi;
-    private int mConcentration=25;
+    private int mConcentration=30;
 
     //finger print stuff
 //    private static FingerLib m_szHost;
@@ -103,11 +109,23 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+    ///Printer Stuff
+    public void initPos() {
+
+        PowerUtils.powerOnOrOff (1, "1");
+        mPosApi=PosFactory.getPosDevice (this); // 获取打印机实例 get printer driver
+        mPosApi.setPrintEventListener (onPrintEventListener);
+        mPosApi.openDev ();
+        mPosApi.setPos (); // 初始化打印机 init printer
+        mPosApi.setEncode (2);
+        mPosApi.setLanguage (15);
+        mPosApi.setMarkDistance (115);
+    }
+
     private String getDeviceName(){
         return Build.DEVICE;
     }
-
-
 
     //HANDLE DEEP LINK
     @Override
@@ -147,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy ();
         if(IsPrinter){
             if (mPosApi != null) {
-                mPosApi.closePos ();
+//                mPosApi.closePos ();
                 mPosApi.closeDev ();
                 PosFactory.Destroy ();
             }
@@ -176,6 +194,7 @@ public class MainActivity extends AppCompatActivity {
         public void onPageFinished(WebView view, String url) {
             mProgressDialog.dismiss();
             view.setVisibility(View.VISIBLE);
+//            parseAndPrintLabelInfo("https://dev.troysys.com/barcode_scanner_interface_mobile/static/www/index.html?print=yes&MO=MO/42222-1/1&O=ONL1000037983-D&S=FedEx\\Ground%20Home&D=2020-05-29&LC=TRY/Stock/E5-2&Prime=false&Rush=false&Reorder=false&Sku=M24RD6MMBEHO#/batch_scan_product/40/287467");
 
             //Check if URL asks for label printing
             if(url.contains(PRINT_LABEL)){
@@ -258,23 +277,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         print_text(label);
+        mPosApi.addMark ();
         mPosApi.printStart ();
     }
 
-
-    ///Printer Stuff
-    public void initPos() {
-        PowerUtils.powerOnOrOff (1, "1");
-        PosFactory.registerCommunicateDriver (this, new SerialDriver ()); // 注册串口类 Register serial driver
-        mPosApi=PosFactory.getPosDevice (); // 获取打印机实例 get printer driver
-        mPosApi.setPrintEventListener (onPrintEventListener);
-        mPosApi.openDev ("/dev/ttyS2", 115200, 0);
-        mPosApi.setPos ().setAutoEnableMark (false)
-                .setEncode (-1)
-                .setLanguage (-1)
-                .setPrintSpeed (-1)
-                .setMarkDistance (-1).init ();// 初始化打印机 init printer
-    }
 
 
     public OnPrintEventListener onPrintEventListener=new OnPrintEventListener () {
@@ -306,7 +312,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public void print_barcode(String input) {
-        int height=80;
+        int height=60;
         BarCodeBean barCodeBean=new BarCodeBean ();
         barCodeBean.setConcentration (mConcentration);
         barCodeBean.setHeight (height);
@@ -336,10 +342,6 @@ public class MainActivity extends AppCompatActivity {
                 textData1.addText("\n");
             }
         }
-        textData1.addText("\n");
-        textData1.addText("\n");
-        textData1.addText("\n");
-        textData1.addText("\n");
         mPosApi.addText (textData1);
     }
 

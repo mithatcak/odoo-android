@@ -49,13 +49,13 @@ android {
     buildTypes {
             debug {
                 debuggable true
-                buildConfigField "String", "SERVER_URL", '"https://dev.troysys.com/barcode_scanner_interface_mobile/static/www/index.html#/login"'
-                buildConfigField "String", "SERVER_BASE_URL", '"dev.troysys.com/barcode_scanner_interface_mobile/static/www/index.html"'
+                buildConfigField "String", "SERVER_URL", '"https://erp-dev.dullesglass.com/web#menu_id=544&action=776"'
+                buildConfigField "String", "SERVER_BASE_URL", '"erp-dev.dullesglass.com"'
             }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "SERVER_URL", '"https://erp.troysys.com/barcode_scanner_interface_mobile/static/www/index.html#/login"'
+            buildConfigField "String", "SERVER_URL", '"https://erp.troysys.com/web#menu_id=544&action=776"'
             buildConfigField "String", "SERVER_BASE_URL", '"erp.troysys.com"'
         }
     }
