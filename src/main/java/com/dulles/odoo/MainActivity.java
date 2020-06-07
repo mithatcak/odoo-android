@@ -216,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
 
     ///WebView Stuff
     private class HelloWebViewClient extends WebViewClient {
-        boolean errorOccurred = false; // Global variable
+        boolean errorOccurred = false;
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view,  WebResourceRequest request) {
@@ -236,18 +236,20 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onPageFinished(WebView view, String url) {
-            if(!errorOccurred){
-                eProgressDialog.dismiss();
-            }
-            mProgressDialog.dismiss();
-            view.setVisibility(View.VISIBLE);
+            if (view.getProgress() == 100) {
+                if (!errorOccurred) {
+                    eProgressDialog.dismiss();
+                }
+                mProgressDialog.dismiss();
+                view.setVisibility(View.VISIBLE);
 //            parseAndPrintLabelInfo("https://dev.troysys.com/barcode_scanner_interface_mobile/static/www/index.html?print=yes&MO=MO/45252-1/1&O=ONL1000037968-D&C=Ali\Rezaiyan-Nojani&S=FedEx\Ground%20Home&D=2020-05-28&LC=TRY/Stock/E3-2&Prime=false&Rush=false&Reorder=false&Sku=SH8X8TR10MMFP#/batch_scan_product/41/287454");
 
-            //Check if URL asks for label printing
-            if(url.contains(PRINT_LABEL)){
-                parseAndPrintLabelInfo(url);
+                //Check if URL asks for label printing
+                if (url.contains(PRINT_LABEL)) {
+                    parseAndPrintLabelInfo(url);
+                }
+                super.onPageFinished(view, url);
             }
-            super.onPageFinished(view, url);
         }
 
         @Override
@@ -404,7 +406,7 @@ public class MainActivity extends AppCompatActivity {
 //                textData1.addText(key + ": " + value);
 //                textData1.addText("\n");
 //            }
-            if(!value.equals("true") && !value.equals("false")){
+            if(!value.equals("true") && !value.equals("false") && !key.equals("C")){
                 value = value.replace("\\\\", " ");
                 textData1.addText(key + ": " + value);
                 textData1.addText("\n");
