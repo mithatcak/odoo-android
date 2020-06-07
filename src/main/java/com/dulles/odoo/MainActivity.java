@@ -2,8 +2,11 @@ package com.dulles.odoo;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.Network;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
@@ -12,15 +15,15 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.SslErrorHandler;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-
-
 
 /* printer libraries */
 import android.printer.sdk.PosFactory;
@@ -38,7 +41,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 /*fingerprint library*/
 //import com.app.example.utils.FingerLib;
-
 
 
 public class MainActivity extends AppCompatActivity {
@@ -60,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     //WebView stuff
     private WebView webView;
     ProgressDialog mProgressDialog;
+    ProgressDialog eProgressDialog;
     private String HTTPS_URL = BuildConfig.SERVER_URL;
     private String BASE_HTTPS_URL = BuildConfig.SERVER_BASE_URL;
     private boolean isSSLErrorDialogShown = false;
@@ -67,6 +70,34 @@ public class MainActivity extends AppCompatActivity {
     private final static String BARCODE_KEY = "MO";
     private final static String PRINT_FLAG = "print";
 
+    private ConnectivityManager connectivityManager;
+
+
+    private final ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
+        @Override
+        public void onAvailable(Network network) {
+            super.onAvailable(network);
+            runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+                    mProgressDialog.dismiss();
+                    webView.reload();
+                }
+            });
+        }
+        @Override
+        public void onLost(Network network) {
+            super.onLost(network);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                mProgressDialog.setMessage("No Internet Connection... ");
+                mProgressDialog.show();
+                }
+            });
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,16 +110,26 @@ public class MainActivity extends AppCompatActivity {
         SetDeviceType(DEVICE_NAME);
 
         //Init Printer
-        if(IsPrinter){
-            Log.d(DEVICE_NAME,"PRINTER INITIATED!!!!");
-            initPos ();
+        if (IsPrinter) {
+            Log.d(DEVICE_NAME, "PRINTER INITIATED!!!!");
+            initPos();
         }
 //        else if(IsFingerPrint)
 //            m_szHost.SZOEMHost_Lib_Init(this, m_txtStatus, m_FpImageViewer, runEnableCtrl, m_spDevice);
 
         mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setCanceledOnTouchOutside(false);
+
+        eProgressDialog = new ProgressDialog(this);
+        eProgressDialog.setCanceledOnTouchOutside(false);
+
         mProgressDialog.setMessage("Loading... ");
         mProgressDialog.show();
+
+        connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        connectivityManager.registerDefaultNetworkCallback(networkCallback);
+
+
 
         webView = findViewById(R.id.webview);
         webView.getSettings().setDomStorageEnabled(true);
@@ -101,18 +142,17 @@ public class MainActivity extends AppCompatActivity {
         webView.getSettings().setSaveFormData(true);
         webView.getSettings().setDatabaseEnabled(true);
         webView.getSettings().setSupportZoom(false);
-        CookieManager.getInstance().setAcceptThirdPartyCookies(webView,true);
+        CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         CookieManager.setAcceptFileSchemeCookies(true);
         webView.loadUrl(HTTPS_URL);
 
         webView.setWebViewClient(new HelloWebViewClient());
 
-    }
+    };
 
 
     ///Printer Stuff
     public void initPos() {
-
         PowerUtils.powerOnOrOff (1, "1");
         mPosApi=PosFactory.getPosDevice (this); // 获取打印机实例 get printer driver
         mPosApi.setPrintEventListener (onPrintEventListener);
@@ -165,19 +205,22 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy ();
         if(IsPrinter){
             if (mPosApi != null) {
-//                mPosApi.closePos ();
                 mPosApi.closeDev ();
                 PosFactory.Destroy ();
             }
             PowerUtils.powerOnOrOff (1, "0");
         }
+        connectivityManager.unregisterNetworkCallback(networkCallback);
     }
 
 
     ///WebView Stuff
     private class HelloWebViewClient extends WebViewClient {
+        boolean errorOccurred = false; // Global variable
+
         @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+        public boolean shouldOverrideUrlLoading(WebView view,  WebResourceRequest request) {
+            String url = request.getUrl().toString();
             if(!url.contains(BASE_HTTPS_URL)){
                 Intent i = new Intent(Intent.ACTION_VIEW);
                 i.setData(Uri.parse(url));
@@ -187,20 +230,40 @@ public class MainActivity extends AppCompatActivity {
             view.setVisibility(View.GONE);
             mProgressDialog.show();
             mProgressDialog.setMessage("Loading...");
+            errorOccurred = false;
             return false;
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
+            if(!errorOccurred){
+                eProgressDialog.dismiss();
+            }
             mProgressDialog.dismiss();
             view.setVisibility(View.VISIBLE);
-//            parseAndPrintLabelInfo("https://dev.troysys.com/barcode_scanner_interface_mobile/static/www/index.html?print=yes&MO=MO/42222-1/1&O=ONL1000037983-D&S=FedEx\\Ground%20Home&D=2020-05-29&LC=TRY/Stock/E5-2&Prime=false&Rush=false&Reorder=false&Sku=M24RD6MMBEHO#/batch_scan_product/40/287467");
+//            parseAndPrintLabelInfo("https://dev.troysys.com/barcode_scanner_interface_mobile/static/www/index.html?print=yes&MO=MO/45252-1/1&O=ONL1000037968-D&C=Ali\Rezaiyan-Nojani&S=FedEx\Ground%20Home&D=2020-05-28&LC=TRY/Stock/E3-2&Prime=false&Rush=false&Reorder=false&Sku=SH8X8TR10MMFP#/batch_scan_product/41/287454");
 
             //Check if URL asks for label printing
             if(url.contains(PRINT_LABEL)){
                 parseAndPrintLabelInfo(url);
             }
             super.onPageFinished(view, url);
+        }
+
+        @Override
+        public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error){
+            errorOccurred = true;
+//            view.loadUrl("about:blank");
+            eProgressDialog.setMessage("No Internet Connection... ");
+            eProgressDialog.show();
+        }
+
+        @Override
+        public void onReceivedHttpError (WebView view,
+                                         WebResourceRequest request,
+                                         WebResourceResponse errorResponse){
+            eProgressDialog.setMessage("Ooops Something Bad Happened... ");
+            eProgressDialog.show();
         }
 
         @Override
@@ -332,11 +395,16 @@ public class MainActivity extends AppCompatActivity {
         for (Map.Entry<String, String> entry : label.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            if(value.equals("true")) {
-                textData1.addText(key);
-                textData1.addText("\n");
-            }
-            else if(!value.equals("false")){
+//            if(value.equals("true")) {
+//                textData1.addText(key);
+//                textData1.addText("\n");
+//            }
+//            else if(!value.equals("false")){
+//                value = value.replace("\\\\", " ");
+//                textData1.addText(key + ": " + value);
+//                textData1.addText("\n");
+//            }
+            if(!value.equals("true") && !value.equals("false")){
                 value = value.replace("\\\\", " ");
                 textData1.addText(key + ": " + value);
                 textData1.addText("\n");
