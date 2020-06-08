@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
     //printer stuff
     private IPosApi mPosApi;
-    private int mConcentration=30;
+    private int mConcentration = 30;
 
     //finger print stuff
 //    private static FingerLib m_szHost;
@@ -86,14 +86,15 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+
         @Override
         public void onLost(Network network) {
             super.onLost(network);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                mProgressDialog.setMessage("No Internet Connection... ");
-                mProgressDialog.show();
+                    mProgressDialog.setMessage("No Internet Connection... ");
+                    mProgressDialog.show();
                 }
             });
         }
@@ -130,7 +131,6 @@ public class MainActivity extends AppCompatActivity {
         connectivityManager.registerDefaultNetworkCallback(networkCallback);
 
 
-
         webView = findViewById(R.id.webview);
         webView.getSettings().setDomStorageEnabled(true);
         webView.setVerticalScrollBarEnabled(false);
@@ -148,22 +148,24 @@ public class MainActivity extends AppCompatActivity {
 
         webView.setWebViewClient(new HelloWebViewClient());
 
-    };
+    }
+
+    ;
 
 
     ///Printer Stuff
     public void initPos() {
-        PowerUtils.powerOnOrOff (1, "1");
-        mPosApi=PosFactory.getPosDevice (this); // 获取打印机实例 get printer driver
-        mPosApi.setPrintEventListener (onPrintEventListener);
-        mPosApi.openDev ();
-        mPosApi.setPos (); // 初始化打印机 init printer
-        mPosApi.setEncode (2);
-        mPosApi.setLanguage (15);
-        mPosApi.setMarkDistance (115);
+        PowerUtils.powerOnOrOff(1, "1");
+        mPosApi = PosFactory.getPosDevice(this); // 获取打印机实例 get printer driver
+        mPosApi.setPrintEventListener(onPrintEventListener);
+        mPosApi.openDev();
+        mPosApi.setPos(); // 初始化打印机 init printer
+        mPosApi.setEncode(2);
+        mPosApi.setLanguage(15);
+        mPosApi.setMarkDistance(115);
     }
 
-    private String getDeviceName(){
+    private String getDeviceName() {
         return Build.DEVICE;
     }
 
@@ -174,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
         setIntent(intent);
 
         Uri data = intent.getData();
-        if(data!=null){
+        if (data != null) {
             webView.loadUrl(data.toString());
         }
     }
@@ -182,33 +184,33 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        super.onResume ();
-        if(IsPrinter){
-            super.onResume ();
-            mPosApi.resume ();
-            PowerUtils.powerOnOrOff (1, "1");
+        super.onResume();
+        if (IsPrinter) {
+            super.onResume();
+            mPosApi.resume();
+            PowerUtils.powerOnOrOff(1, "1");
         }
     }
 
     @Override
     protected void onPause() {
-        super.onPause ();
-        if(IsPrinter){
-            mPosApi.stop ();
-            PowerUtils.powerOnOrOff (1, "0");
+        super.onPause();
+        if (IsPrinter) {
+            mPosApi.stop();
+            PowerUtils.powerOnOrOff(1, "0");
         }
     }
 
 
     @Override
     protected void onDestroy() {
-        super.onDestroy ();
-        if(IsPrinter){
+        super.onDestroy();
+        if (IsPrinter) {
             if (mPosApi != null) {
-                mPosApi.closeDev ();
-                PosFactory.Destroy ();
+                mPosApi.closeDev();
+                PosFactory.Destroy();
             }
-            PowerUtils.powerOnOrOff (1, "0");
+            PowerUtils.powerOnOrOff(1, "0");
         }
         connectivityManager.unregisterNetworkCallback(networkCallback);
     }
@@ -219,9 +221,9 @@ public class MainActivity extends AppCompatActivity {
         boolean errorOccurred = false;
 
         @Override
-        public boolean shouldOverrideUrlLoading(WebView view,  WebResourceRequest request) {
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
             String url = request.getUrl().toString();
-            if(!url.contains(BASE_HTTPS_URL)){
+            if (!url.contains(BASE_HTTPS_URL)) {
                 Intent i = new Intent(Intent.ACTION_VIEW);
                 i.setData(Uri.parse(url));
                 startActivity(i);
@@ -253,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error){
+        public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
             errorOccurred = true;
 //            view.loadUrl("about:blank");
             eProgressDialog.setMessage("No Internet Connection... ");
@@ -261,9 +263,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onReceivedHttpError (WebView view,
-                                         WebResourceRequest request,
-                                         WebResourceResponse errorResponse){
+        public void onReceivedHttpError(WebView view,
+                                        WebResourceRequest request,
+                                        WebResourceResponse errorResponse) {
             eProgressDialog.setMessage("Ooops Something Bad Happened... ");
             eProgressDialog.show();
         }
@@ -271,8 +273,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceivedSslError(WebView view, final SslErrorHandler handler, SslError error) {
             if (!isSSLErrorDialogShown) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    AlertDialog alertDialog = builder.create();
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                AlertDialog alertDialog = builder.create();
                 String message = "SSL Certificate error.";
                 switch (error.getPrimaryError()) {
                     case SslError.SSL_UNTRUSTED:
@@ -309,47 +311,45 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 alertDialog.show();
-            }else{
+            } else {
                 handler.proceed();
             }
         }
     }
 
-    private void SetDeviceType(String DeviceName){
-        if(DeviceName.equals(DEVICE_PRINTER))
+    private void SetDeviceType(String DeviceName) {
+        if (DeviceName.equals(DEVICE_PRINTER))
             IsPrinter = true;
         else if (DeviceName.equals(DEVICE_FINGER_PRINT))
             IsFingerPrint = true;
     }
 
     //Parse params from URL then print label
-    public void parseAndPrintLabelInfo(String url){
-        if(!IsPrinter){
-            Log.d(DEVICE_NAME,"Device doesn't have printer!");
+    public void parseAndPrintLabelInfo(String url) {
+        if (!IsPrinter) {
+            Log.d(DEVICE_NAME, "Device doesn't have printer!");
             return;
         }
         Map<String, String> label = new HashMap<>();
         Uri uri = Uri.parse(url);
 
         Set<String> paramNames = uri.getQueryParameterNames();
-        for (String key: paramNames) {
+        for (String key : paramNames) {
             String value = uri.getQueryParameter(key);
-            if(key.equals(BARCODE_KEY)) {
+            if (key.equals(BARCODE_KEY)) {
                 print_barcode(value);
-            }
-            else if(!key.equals(PRINT_FLAG)){
-                label.put(key,value);
+            } else if (!key.equals(PRINT_FLAG)) {
+                label.put(key, value);
             }
         }
         print_text(label);
-        mPosApi.addMark ();
-        mPosApi.printStart ();
+        mPosApi.addMark();
+        mPosApi.printStart();
     }
 
-
-
-    public OnPrintEventListener onPrintEventListener=new OnPrintEventListener () {
+    public OnPrintEventListener onPrintEventListener = new OnPrintEventListener() {
         String message = "Printer Status";
+
         @Override
         public void onPrintState(int state) {
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -377,23 +377,23 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public void print_barcode(String input) {
-        int height=60;
-        BarCodeBean barCodeBean=new BarCodeBean ();
-        barCodeBean.setConcentration (mConcentration);
-        barCodeBean.setHeight (height);
-        barCodeBean.setWidth (2);// 条码宽度1-4; Width value 1 2 3 4
-        barCodeBean.setText (input);
-        barCodeBean.setBarType (BarCode.CODE128);
-        mPosApi.addBarCode (barCodeBean, ALIGN_MODE.ALIGN_CENTER);
-        mPosApi.addFeedPaper (true, 1);
+        int height = 60;
+        BarCodeBean barCodeBean = new BarCodeBean();
+        barCodeBean.setConcentration(mConcentration);
+        barCodeBean.setHeight(height);
+        barCodeBean.setWidth(2);// 条码宽度1-4; Width value 1 2 3 4
+        barCodeBean.setText(input);
+        barCodeBean.setBarType(BarCode.CODE128);
+        mPosApi.addBarCode(barCodeBean, ALIGN_MODE.ALIGN_CENTER);
+        mPosApi.addFeedPaper(true, 1);
     }
 
-    public void print_text(Map<String,String> label){
-        TextData textData1=new TextData ();
-        textData1.addConcentration (mConcentration);
-        textData1.addFont (BarCode.FONT_ASCII_12x24);
-        textData1.addTextAlign (BarCode.ALIGN_CENTER);
-        textData1.addFontSize (BarCode.NORMAL);
+    public void print_text(Map<String, String> label) {
+        TextData textData1 = new TextData();
+        textData1.addConcentration(mConcentration);
+        textData1.addFont(BarCode.FONT_ASCII_12x24);
+        textData1.addTextAlign(BarCode.ALIGN_CENTER);
+        textData1.addFontSize(BarCode.NORMAL);
         for (Map.Entry<String, String> entry : label.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
@@ -406,13 +406,13 @@ public class MainActivity extends AppCompatActivity {
 //                textData1.addText(key + ": " + value);
 //                textData1.addText("\n");
 //            }
-            if(!value.equals("true") && !value.equals("false") && !key.equals("C")){
+            if (!value.equals("true") && !value.equals("false") && !key.equals("C")) {
                 value = value.replace("\\\\", " ");
                 textData1.addText(key + ": " + value);
                 textData1.addText("\n");
             }
         }
-        mPosApi.addText (textData1);
+        mPosApi.addText(textData1);
     }
 
     ///FINGER PRINT READER STUFF
