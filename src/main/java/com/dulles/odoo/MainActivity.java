@@ -150,9 +150,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    ;
-
-
     ///Printer Stuff
     public void initPos() {
         PowerUtils.powerOnOrOff(1, "1");
@@ -355,9 +352,6 @@ public class MainActivity extends AppCompatActivity {
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             AlertDialog alertDialog = builder.create();
             switch (state) {
-                case BarCode.ERR_POS_PRINT_SUCC:
-                    message = "Print success";
-                    break;
                 case BarCode.ERR_POS_PRINT_FAILED:
                     message = "Error. Print failed.";
                     break;
