@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     private String BASE_HTTPS_URL = BuildConfig.SERVER_BASE_URL;
     private boolean isSSLErrorDialogShown = false;
     private final static String PRINT_LABEL = "print=yes";
+    private final static String RESTART_PRINTER = "restartprinter=yes";
     private final static String BARCODE_KEY = "MO";
     private final static String PRINT_FLAG = "print";
 
@@ -247,6 +248,9 @@ public class MainActivity extends AppCompatActivity {
                 if (url.contains(PRINT_LABEL)) {
                     parseAndPrintLabelInfo(url);
                 }
+                else if(url.contains(RESTART_PRINTER)){
+                    restartPrinter();
+                }
                 super.onPageFinished(view, url);
             }
         }
@@ -319,6 +323,16 @@ public class MainActivity extends AppCompatActivity {
             IsPrinter = true;
         else if (DeviceName.equals(DEVICE_FINGER_PRINT))
             IsFingerPrint = true;
+    }
+
+    private void restartPrinter(){
+
+
+        mPosApi.printFeatureList ();
+        mPosApi.printStart ();
+
+        mPosApi.addMark ();
+        mPosApi.printStart ();
     }
 
     //Parse params from URL then print label
