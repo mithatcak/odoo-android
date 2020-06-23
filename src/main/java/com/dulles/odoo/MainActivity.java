@@ -21,6 +21,7 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -67,9 +68,15 @@ public class MainActivity extends AppCompatActivity {
     private String BASE_HTTPS_URL = BuildConfig.SERVER_BASE_URL;
     private boolean isSSLErrorDialogShown = false;
     private final static String PRINT_LABEL = "print=yes";
-    private final static String RESTART_PRINTER = "restartprinter=yes";
+    private final static String RESTART_PRINTER = "restart=yes";
+    private final static String REPRINT_LABEL = "reprint=yes";
     private final static String BARCODE_KEY = "MO";
     private final static String PRINT_FLAG = "print";
+    private final static String REPRINT_FLAG = "reprint";
+
+//    private Map<String, ArrayList> printedLabels = new HashMap<>();
+    private Map<String, Map<String, String>> printedLabels =
+            new HashMap<>();
 
     private ConnectivityManager connectivityManager;
 
@@ -243,13 +250,16 @@ public class MainActivity extends AppCompatActivity {
                 mProgressDialog.dismiss();
                 view.setVisibility(View.VISIBLE);
 //            parseAndPrintLabelInfo("https://dev.troysys.com/barcode_scanner_interface_mobile/static/www/index.html?print=yes&MO=MO/45252-1/1&O=ONL1000037968-D&C=Ali\Rezaiyan-Nojani&S=FedEx\Ground%20Home&D=2020-05-28&LC=TRY/Stock/E3-2&Prime=false&Rush=false&Reorder=false&Sku=SH8X8TR10MMFP#/batch_scan_product/41/287454");
-
                 //Check if URL asks for label printing
                 if (url.contains(PRINT_LABEL)) {
-                    parseAndPrintLabelInfo(url);
+                    parseAndPrintLabelInfo(url,false);
                 }
                 else if(url.contains(RESTART_PRINTER)){
+                    Log.d(DEVICE_NAME, "Restarting printer");
                     restartPrinter();
+                }
+                else if(url.contains(REPRINT_LABEL)){
+//                    rePrintLabel(url);
                 }
                 super.onPageFinished(view, url);
             }
@@ -326,8 +336,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void restartPrinter(){
-
-
+        if (!IsPrinter) {
+            Log.d(DEVICE_NAME, "Device doesn't have printer!");
+            return;
+        }
         mPosApi.printFeatureList ();
         mPosApi.printStart ();
 
@@ -336,7 +348,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Parse params from URL then print label
-    public void parseAndPrintLabelInfo(String url) {
+    public void parseAndPrintLabelInfo(String url, boolean isRePrint) {
+        String locSkuKey = null;
+        String moNumber= null;
+        Map<String, String> moURL = new HashMap<>();
         if (!IsPrinter) {
             Log.d(DEVICE_NAME, "Device doesn't have printer!");
             return;
@@ -348,15 +363,53 @@ public class MainActivity extends AppCompatActivity {
         for (String key : paramNames) {
             String value = uri.getQueryParameter(key);
             if (key.equals(BARCODE_KEY)) {
+                moNumber = value;
                 print_barcode(value);
             } else if (!key.equals(PRINT_FLAG)) {
                 label.put(key, value);
+                if(key.equals("LC")){
+                    locSkuKey += key;
+                }
+                else if( key.equals("SKU")){
+                    locSkuKey += key;
+                }
             }
+        }
+        if(!isRePrint){
+            moURL.put(moNumber,url);
+            printedLabels.put(locSkuKey,moURL);
         }
         print_text(label);
         mPosApi.addMark();
         mPosApi.printStart();
     }
+
+//    public void rePrintLabel(String url){
+//        String locSkuKey = null;
+//        Uri uri = Uri.parse(url);
+//        Map<String, String> label = new HashMap<>();
+//        Set<String> paramNames = uri.getQueryParameterNames();
+//        for (String key : paramNames) {
+//            if(key.equals("LC")){
+//                locSkuKey += key;
+//            }
+//            else if( key.equals("SKU")){
+//                locSkuKey += key;
+//            }
+//        }
+//        showReprintOptions(printedLabels.get(locSkuKey));
+//
+//    }
+
+//    public void showReprintOptions(Map<String,String> availableMOs){
+//        //Shows available MOs
+//
+//        //User selects an MOs
+//
+//        //calls parse and print
+//        parseAndPrintLabelInfo(availableMOs.get(selectedMO),true);
+//
+//    }
 
     public OnPrintEventListener onPrintEventListener = new OnPrintEventListener() {
         String message = "Printer Status";
