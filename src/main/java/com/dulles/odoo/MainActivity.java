@@ -467,6 +467,9 @@ public class MainActivity extends AppCompatActivity {
 //                textData1.addText(key + ": " + value);
 //                textData1.addText("\n");
 //            }
+            if(key.equals("Prime")){
+                textData1.addText(key + " ");
+            }
             if (!value.equals("true") && !value.equals("false") && !key.equals("C")) {
                 value = value.replace("\\\\", " ");
                 textData1.addText(key + ": " + value);
