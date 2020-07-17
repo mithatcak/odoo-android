@@ -400,7 +400,7 @@ public class MainActivity extends AppCompatActivity {
 //                textData1.addText(key + ": " + value);
 //                textData1.addText("\n");
 //            }
-            if(key.equals("Prime")){
+            if(key.equals("Prime") && value.equals("true")){
                 textData1.addText(key + " ");
             }
             if (!value.equals("true") && !value.equals("false") && !key.equals("C")) {
